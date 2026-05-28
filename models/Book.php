@@ -22,6 +22,8 @@ use yii\db\ActiveRecord;
  */
 class Book extends ActiveRecord
 {
+    public array $authorIds = [];
+
     public static function tableName(): string
     {
         return '{{%books}}';
@@ -37,14 +39,14 @@ class Book extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['title', 'release_year', 'isbn'], 'required'],
+            [['title', 'release_year', 'isbn', 'authorIds'], 'required'],
             [['release_year', 'created_at', 'updated_at'], 'integer'],
             ['description', 'string'],
             [['title', 'cover_image'], 'string', 'max' => 255],
             ['isbn', 'string', 'max' => 20],
             ['isbn', 'unique'],
             [['title', 'isbn', 'cover_image'], 'trim'],
-
+            ['authorIds', 'each', 'rule' => ['integer']],
             [
                 'release_year',
                 'integer',
@@ -59,6 +61,7 @@ class Book extends ActiveRecord
         return [
             'id' => 'ID',
             'title' => 'Title',
+            'authorIds' => 'Authors',
             'release_year' => 'Release Year',
             'description' => 'Description',
             'isbn' => 'ISBN',
@@ -72,5 +75,28 @@ class Book extends ActiveRecord
     {
         return $this->hasMany(Author::class, ['id' => 'author_id'])
                     ->viaTable('{{%book_author}}', ['book_id' => 'id']);
+    }
+
+    public function afterFind(): void
+    {
+        parent::afterFind();
+
+        $this->authorIds = array_map(
+            static fn (Author $author): int => $author->id,
+            $this->authors
+        );
+    }
+
+    public function saveAuthors(): void
+    {
+        $this->unlinkAll('authors', true);
+
+        foreach ($this->authorIds as $authorId) {
+            $author = Author::findOne((int) $authorId);
+
+            if ($author !== null) {
+                $this->link('authors', $author);
+            }
+        }
     }
 }
