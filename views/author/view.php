@@ -2,9 +2,12 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\models\AuthorSubscription;
+use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
 /** @var app\models\Author $model */
+/** @var AuthorSubscription $subscription */
 
 $this->title = $model->full_name;
 $this->params['breadcrumbs'][] = ['label' => 'Authors', 'url' => ['index']];
@@ -35,5 +38,23 @@ $this->params['breadcrumbs'][] = $this->title;
             'full_name',
         ],
     ]) ?>
+
+    <h3>Subscribe to new books by this author</h3>
+
+    <?php $form = ActiveForm::begin([
+        'action' => ['author/subscribe', 'id' => $model->id],
+        'method' => 'post',
+    ]); ?>
+
+    <?= $form->field($subscription, 'phone')->textInput([
+        'maxlength' => true,
+        'placeholder' => '+79990000000',
+    ]) ?>
+
+    <div class="form-group">
+        <?= Html::submitButton('Subscribe', ['class' => 'btn btn-primary']) ?>
+    </div>
+
+    <?php ActiveForm::end(); ?>
 
 </div>

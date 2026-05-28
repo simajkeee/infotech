@@ -2,12 +2,15 @@
 
 namespace app\controllers;
 
+use Yii;
 use app\models\Author;
 use app\models\AuthorSearch;
+use app\models\AuthorSubscription;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * AuthorController implements the CRUD actions for Author model.
@@ -69,13 +72,14 @@ class AuthorController extends Controller
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'subscription' => new AuthorSubscription(),
         ]);
     }
 
     /**
      * Creates a new Author model.
      * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
+     * @return string|Response
      */
     public function actionCreate()
     {
@@ -98,7 +102,7 @@ class AuthorController extends Controller
      * Updates an existing Author model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
@@ -118,7 +122,7 @@ class AuthorController extends Controller
      * Deletes an existing Author model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id
-     * @return \yii\web\Response
+     * @return Response
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id)
@@ -126,6 +130,24 @@ class AuthorController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionSubscribe(int $id): Response|string
+    {
+        $author = $this->findModel($id);
+        $subscription = new AuthorSubscription();
+        $subscription->author_id = $author->id;
+
+        if ($subscription->load(Yii::$app->request->post()) && $subscription->save()) {
+            Yii::$app->session->setFlash('success', 'You have subscribed to this author.');
+
+            return $this->redirect(['view', 'id' => $author->id]);
+        }
+
+        return $this->render('view', [
+            'model' => $author,
+            'subscription' => $subscription,
+        ]);
     }
 
     /**
