@@ -1,108 +1,110 @@
 # Book Catalog
 
-Yii2 + MySQL web application for managing books, authors, guest subscriptions, and author statistics.
+Yii2 + MySQL web-приложение для каталога книг, авторов, подписок гостей и отчёта по авторам.
 
-## Features
+## Возможности
 
-* Book catalog with CRUD
-* Author catalog with CRUD
-* Many-to-many relation between books and authors
-* Book cover image upload
-* Guest access for viewing books and authors
-* Guest subscription to new books by selected author
-* Authenticated user access for creating, updating, and deleting books/authors
-* Top 10 authors report by selected release year
-* Seed command with demo books, authors, subscriptions, and cover images
+- Каталог книг.
+- Каталог авторов.
+- CRUD для книг и авторов.
+- Связь many-to-many между книгами и авторами.
+- Загрузка обложки книги при создании и редактировании.
+- Просмотр книг и авторов для гостей.
+- Подписка гостя на новые книги выбранного автора.
+- Создание, редактирование и удаление книг/авторов только для авторизованного пользователя.
+- Отчёт TOP-10 авторов по количеству книг за выбранный год.
+- Seed-команда с демо-книгами, авторами, подписками и изображениями.
+- Опциональная SMS-интеграция через SMSPilot.
 
-## Requirements
+## Требования
 
-* Docker
-* Docker Compose
+- Docker
+- Docker Compose
 
-## Setup
+## Установка
 
-Copy environment file:
+Скопировать файл окружения:
 
 ```bash
 cp .env.example .env
 ```
 
-Start containers:
+Запустить контейнеры:
 
 ```bash
 docker compose up -d
 ```
 
-Install dependencies:
+Установить зависимости:
 
 ```bash
 docker compose exec php composer install
 ```
 
-Run migrations:
+Применить миграции:
 
 ```bash
 docker compose exec php php yii migrate
 ```
 
-Create demo data:
+Создать демо-данные:
 
 ```bash
 docker compose exec php php yii seed
 ```
 
-Or reset demo data:
+Или сбросить демо-данные и создать их заново:
 
 ```bash
 docker compose exec php php yii seed/reset
 ```
 
-The reset command clears books, authors, book-author relations, and subscriptions, then recreates demo data.
+Команда `seed/reset` очищает таблицы книг, авторов, связей книг с авторами и подписок, затем заново создаёт демо-данные. Таблица пользователей не очищается.
 
-## Login
+## Доступ администратора
 
-Default admin user:
+Демо-пользователь:
 
 ```text
 Username: admin
 Password: admin
 ```
 
-## Main URLs
+## Основные URL
 
-Home:
+Главная страница:
 
 ```text
 http://localhost:8000
 ```
 
-Books:
+Книги:
 
 ```text
 http://localhost:8000/index.php?r=book/index
 ```
 
-Authors:
+Авторы:
 
 ```text
 http://localhost:8000/index.php?r=author/index
 ```
 
-Top Authors Report:
+Отчёт TOP-10 авторов:
 
 ```text
 http://localhost:8000/index.php?r=report/top-authors
 ```
 
-Example report by year:
+Пример отчёта за конкретный год:
 
 ```text
 http://localhost:8000/index.php?r=report/top-authors&year=1993
 ```
 
-## Database
+## База данных
 
-Database connection inside Docker:
+Подключение внутри Docker:
 
 ```text
 Host: mysql
@@ -112,7 +114,7 @@ User: yii2
 Password: yii2
 ```
 
-Database connection from host machine:
+Подключение с host-машины:
 
 ```text
 Host: 127.0.0.1
@@ -122,82 +124,163 @@ User: yii2
 Password: yii2
 ```
 
-## Seed Images
+## Изображения книг
 
-Seed source images are stored in:
+Исходные изображения для seed находятся в:
 
 ```text
 web/seed-images
 ```
 
-When running the seed command, images are copied to:
+При запуске seed-команды изображения копируются в:
 
 ```text
 web/uploads/books
 ```
 
-Book records store public image paths like:
+В таблице книг сохраняется публичный путь, например:
 
 ```text
 /uploads/books/war-and-peace.png
 ```
 
-## Access Rules
+При создании или редактировании книги можно загрузить новую обложку через форму. Загруженные изображения также сохраняются в `web/uploads/books`.
 
-Guest users can:
+## Права доступа
 
-* View books
-* View authors
-* Subscribe to new books by selected author
-* View the top authors report
+Гость может:
 
-Authenticated users can:
+- смотреть список книг;
+- смотреть страницу книги;
+- смотреть список авторов;
+- смотреть страницу автора;
+- подписаться на новые книги выбранного автора;
+- смотреть отчёт TOP-10 авторов.
 
-* View books and authors
-* Create books and authors
-* Update books and authors
-* Delete books and authors
+Авторизованный пользователь может:
 
-## Useful Commands
+- смотреть книги и авторов;
+- создавать книги и авторов;
+- редактировать книги и авторов;
+- удалять книги и авторов.
 
-Run migrations:
+Создание, редактирование и удаление книг/авторов защищены авторизацией. Удаление разрешено только через POST-запрос.
+
+## Подписки на авторов
+
+Гость может подписаться на автора на странице автора. Для подписки сохраняется номер телефона и `author_id`.
+
+Один и тот же номер телефона не может подписаться на одного автора повторно.
+
+## SMSPilot
+
+SMS-уведомления реализованы как дополнительная возможность.
+
+SMS отправляется при создании новой книги для автора, на которого есть подписчики.
+
+По умолчанию отправка отключена, чтобы приложение не зависело от внешнего сервиса:
+
+```env
+SMSPILOT_ENABLED=0
+SMSPILOT_API_KEY=
+SMSPILOT_FROM=INFORM
+```
+
+Чтобы включить отправку SMS, нужно настроить `.env`:
+
+```env
+SMSPILOT_ENABLED=1
+SMSPILOT_API_KEY=your_api_key
+SMSPILOT_FROM=INFORM
+```
+
+Приложение отправляет запрос в SMSPilot API и логирует ответ провайдера. Если SMSPilot возвращает ошибку, основной функционал приложения не ломается.
+
+### Ограничения SMSPilot
+
+Живая отправка SMS зависит от активации и настроек аккаунта SMSPilot.
+
+Для персональных аккаунтов SMSPilot может требовать:
+
+- добавить номера получателей в белый список;
+- или согласовать SMS-шаблон перед отправкой сообщений на разные номера.
+
+Во время проверки интеграции SMSPilot принял запрос от приложения, но отправил email с антиспам-уведомлением и предложил добавить SMS-шаблон или добавить номер получателя в белый список.
+
+Для более стабильной отправки используется шаблонный текст сообщения:
+
+```text
+New book has been added to the catalog.
+```
+
+Если в SMSPilot согласован другой шаблон, текст сообщения в `BookNotificationService` должен соответствовать согласованному шаблону.
+
+## Полезные команды
+
+Применить миграции:
 
 ```bash
 docker compose exec php php yii migrate
 ```
 
-Check migration history:
+Посмотреть историю миграций:
 
 ```bash
 docker compose exec php php yii migrate/history
 ```
 
-Run seed:
+Запустить seed:
 
 ```bash
 docker compose exec php php yii seed
 ```
 
-Reset seed data:
+Сбросить и заново создать seed-данные:
 
 ```bash
 docker compose exec php php yii seed/reset
 ```
 
-Open PHP container shell:
+Открыть shell PHP-контейнера:
 
 ```bash
 docker compose exec php bash
 ```
 
-## Submission Notes
+## Финальная проверка
 
-Do not include generated or runtime directories in the submitted archive:
+После чистого запуска можно проверить проект так:
+
+```bash
+docker compose down -v
+docker compose up -d
+docker compose exec php composer install
+docker compose exec php php yii migrate
+docker compose exec php php yii seed/reset
+```
+
+Затем открыть:
+
+```text
+http://localhost:8000
+```
+
+И войти под:
+
+```text
+admin / admin
+```
+
+## Что не нужно включать в архив/репозиторий
+
+Не нужно включать сгенерированные и runtime-директории:
 
 ```text
 vendor/
 runtime/
 web/assets/
+web/uploads/books/*
+.env
 ```
 
-Include project source files, migrations, seed command, views, controllers, models, config examples, and seed images.
+Нужно включить исходный код проекта, миграции, команды, модели, контроллеры, views, `.env.example`, `README.md` и `web/seed-images`.
