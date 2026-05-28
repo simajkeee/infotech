@@ -6,11 +6,13 @@ namespace app\controllers;
 
 use app\models\Book;
 use app\models\BookSearch;
+use app\services\SmsPilotService;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
+use app\services\BookNotificationService;
 
 /**
  * BookController implements the CRUD actions for Book model.
@@ -90,6 +92,8 @@ class BookController extends Controller
 
             if ($model->validate() && $model->uploadCoverImage() && $model->save(false)) {
                 $model->saveAuthors();
+
+                new BookNotificationService(new SmsPilotService())->notifySubscribers($model);
 
                 return $this->redirect(['view', 'id' => $model->id]);
             }
