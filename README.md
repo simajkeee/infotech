@@ -47,7 +47,7 @@ docker compose exec php composer install
 docker compose exec php php yii migrate
 ```
 
-Создать демо-данные:
+Создать демо-данные. Демо-пользователь создаётся автоматически при запуске seed-команды:
 
 ```bash
 docker compose exec php php yii seed
