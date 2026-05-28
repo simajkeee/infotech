@@ -36,4 +36,12 @@ tests/_support/_generated
 /.vagrant
 
 .env
-/web/uploads
+
+/runtime/*
+!/runtime/.gitignore
+
+/web/assets/*
+!/web/assets/.gitignore
+
+/web/uploads/books/*
+!/web/uploads/books/.gitignore
