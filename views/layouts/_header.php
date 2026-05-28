@@ -14,12 +14,16 @@ $items = [
         'url' => ['/site/index'],
     ],
     [
-        'label' => 'About',
-        'url' => ['/site/about'],
+        'label' => 'Books',
+        'url' => ['/book/index'],
     ],
     [
-        'label' => 'Contact',
-        'url' => ['/site/contact'],
+        'label' => 'Authors',
+        'url' => ['/author/index'],
+    ],
+    [
+        'label' => 'Top Authors',
+        'url' => ['/report/top-authors'],
     ],
     [
         'label' => 'Login',
