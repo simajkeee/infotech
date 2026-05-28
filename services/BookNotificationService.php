@@ -34,10 +34,7 @@ readonly class BookNotificationService
         }
 
         foreach ($phones as $phone) {
-            $this->smsPilotService->send(
-                $phone,
-                sprintf('New book "%s" has been added to the catalog.', $book->title)
-            );
+            $this->smsPilotService->send($phone, 'New book has been added to the catalog.');
         }
     }
 }
