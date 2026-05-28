@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace app\models;
 
+use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\web\UploadedFile;
 
 /**
  * @property int $id
@@ -23,6 +25,11 @@ use yii\db\ActiveRecord;
 class Book extends ActiveRecord
 {
     public array $authorIds = [];
+
+    /**
+     * @var UploadedFile|null
+     */
+    public $coverImageFile = null;
 
     public static function tableName(): string
     {
@@ -47,6 +54,15 @@ class Book extends ActiveRecord
             ['isbn', 'unique'],
             [['title', 'isbn', 'cover_image'], 'trim'],
             ['authorIds', 'each', 'rule' => ['integer']],
+
+            [
+                'coverImageFile',
+                'file',
+                'skipOnEmpty' => true,
+                'extensions' => ['png', 'jpg', 'jpeg', 'webp'],
+                'maxSize' => 1024 * 1024 * 2,
+            ],
+
             [
                 'release_year',
                 'integer',
@@ -62,6 +78,7 @@ class Book extends ActiveRecord
             'id' => 'ID',
             'title' => 'Title',
             'authorIds' => 'Authors',
+            'coverImageFile' => 'Cover Image',
             'release_year' => 'Release Year',
             'description' => 'Description',
             'isbn' => 'ISBN',
@@ -98,5 +115,30 @@ class Book extends ActiveRecord
                 $this->link('authors', $author);
             }
         }
+    }
+
+    public function uploadCoverImage(): bool
+    {
+        if ($this->coverImageFile === null) {
+            return true;
+        }
+
+        $uploadDir = Yii::getAlias('@webroot/uploads/books');
+        if (!is_dir($uploadDir)) {
+            if (!mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $uploadDir));
+            }
+        }
+
+        $fileName = uniqid('book_', true) . '.' . $this->coverImageFile->extension;
+        $filePath = $uploadDir . DIRECTORY_SEPARATOR . $fileName;
+
+        if (!$this->coverImageFile->saveAs($filePath)) {
+            return false;
+        }
+
+        $this->cover_image = '/uploads/books/' . $fileName;
+
+        return true;
     }
 }

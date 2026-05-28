@@ -45,7 +45,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'release_year',
             'description:ntext',
             'isbn',
-            'cover_image',
+            [
+                'attribute' => 'cover_image',
+                'format' => 'html',
+                'value' => static function ($model): string {
+                    if (empty($model->cover_image)) {
+                        return 'No image';
+                    }
+
+                    return Html::img($model->cover_image, [
+                        'alt' => $model->title,
+                        'style' => 'max-width: 220px; height: auto;',
+                    ]);
+                },
+            ],
         ],
     ]) ?>
 

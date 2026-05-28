@@ -35,9 +35,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'title',
             'release_year',
             'isbn',
-            //'cover_image',
-            //'created_at',
-            //'updated_at',
+            [
+                'attribute' => 'cover_image',
+                'format' => 'html',
+                'value' => static function (Book $model): string {
+                    if (empty($model->cover_image)) {
+                        return 'No image';
+                    }
+
+                    return Html::img($model->cover_image, [
+                        'alt' => $model->title,
+                        'style' => 'max-width: 60px; height: auto;',
+                    ]);
+                },
+            ],
             [
                 'class' => ActionColumn::class,
                 'template' => Yii::$app->user->isGuest ? '{view}' : '{view} {update} {delete}',
